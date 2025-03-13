@@ -18,7 +18,7 @@ double halfCircle = atan(1) * 4;
 double tau = circle; // 2 * PI = TAU
 double pi = halfCircle; // TAU / 2 = PI
 
-int g_w = 1000, g_h = 1000;
+int g_w = 800, g_h = 800;
 
 unsigned char g_prevKey;
 
@@ -263,7 +263,7 @@ void Display2() {
   fractalBinaryTree(t, 0.95, g_recursionCurrent);
 }
 
-void fractalSquare(Turtle t, float size, int recursionsLeft = 1) {
+void fractalSquare(Turtle t, float size, int recursionsLeft) {
     if(recursionsLeft > 0) {
       --recursionsLeft;
       //patratul initial
@@ -311,12 +311,48 @@ void Display3() {
   
 }
 
+//am substituit  conform unei regului  pentru fiecare valoare de A si B 
+void fractalLSystemRecursive(Turtle &t, char symbol, float distance, int recursionsLeft) {
+  if(recursionsLeft == 0) {
+      if(symbol == 'A' ) {
+          t.draw(distance);
+        } else if(symbol == 'B') {
+          t.draw(distance);
+      } else if(symbol == '+') {
+          t.rotate(pi / 3);
+      } else if(symbol == '-') {
+          t.rotate(-pi / 3); 
+      }
+  } else {
+      if(symbol == 'A') {
+          fractalLSystemRecursive(t, 'B', distance, recursionsLeft - 1);
+          fractalLSystemRecursive(t, '-', distance, recursionsLeft - 1);
+          fractalLSystemRecursive(t, 'A', distance, recursionsLeft - 1);
+          fractalLSystemRecursive(t, '-', distance, recursionsLeft - 1);
+          fractalLSystemRecursive(t, 'B', distance, recursionsLeft - 1);
+      } else if(symbol == 'B') {
+          fractalLSystemRecursive(t, 'A', distance, recursionsLeft - 1);
+          fractalLSystemRecursive(t, '+', distance, recursionsLeft - 1);
+          fractalLSystemRecursive(t, 'B', distance, recursionsLeft - 1);
+          fractalLSystemRecursive(t, '+', distance, recursionsLeft - 1);
+          fractalLSystemRecursive(t, 'A', distance, recursionsLeft - 1);
+      } else if(symbol == '+' || symbol == '-') {
+          fractalLSystemRecursive(t, symbol, distance, 0);
+      }
+  }
+}
 
 void Display4() {
-  //Draw the triangle-like hex line fractal here.
   glColor3f(1, 0, 0);
   drawRecursionLevel();
   
+  Turtle t(-0.95, -0.95);
+  if (g_recursionCurrent % 2 != 0) {
+    t.rotate(pi/3);
+    fractalLSystemRecursive(t, 'A', 1.90 / pow(2, g_recursionCurrent), g_recursionCurrent);
+  } else {
+  fractalLSystemRecursive(t, 'A', 1.90 / pow(2, g_recursionCurrent), g_recursionCurrent);
+}
 }
 
 template <typename FloatType>
