@@ -435,25 +435,96 @@ void Display5() {
 }
 
 
-//Modify what you think necessary in the MB class to draw the Mandelbrot Fractal.
 template <typename FloatType>
-class MB: public JF<FloatType> {
-public:
-  MB(FloatType xmin, FloatType xmax, FloatType ymin, FloatType ymax, FloatType a = 0, FloatType b = 0, FloatType maxRadius = 20, int maxIteration = 150):
-    JF<FloatType>(xmin, xmax, ymin, ymax, a, b, maxRadius, maxIteration) {}
-};
+  class MB: public JF<FloatType> {
+  public:
+    MB(FloatType xmin, FloatType xmax, FloatType ymin, FloatType ymax, FloatType a = 0, FloatType b = 0, FloatType maxRadius = 20, int maxIteration = 150):
+      JF<FloatType>(xmin, xmax, ymin, ymax, a, b, maxRadius, maxIteration) {}
+  
+    void compute_mandelbrot(double left, double right, double top, double bottom) {
+      const int MAX_ITERATIONS = 500;
+      const int width = glutGet(GLUT_WINDOW_WIDTH);
+      const int height = glutGet(GLUT_WINDOW_HEIGHT);
+  
+      glBegin(GL_POINTS);
+      for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+          std::complex<double> c(left + (x * (right - left) / width), bottom + ((height - y) * (top - bottom) / height));
+  
+          std::complex<double> z(0.0, 0.0);
+          int iterations = 0;
+          while (abs(z) < 2.0 && iterations < MAX_ITERATIONS) {
+            z = z * z + c;
+            ++iterations;
+          }
+  
+          float r, g, b;
+  
+          if (iterations == MAX_ITERATIONS) {
+            glColor3f(0.0f, 0.0f, 0.0f);
+          } else {
+            float colorIndex = (iterations % 17) / 16.0f;
+          
+            if (colorIndex < 0.1) {
+              glColor3f(0.0706f, 0.1294f, 0.9333f);
+            } else if (colorIndex < 0.15) {
+              glColor3f(0.165f, 0.263f, 0.835f);
+            } else if (colorIndex < 0.2) {
+              glColor3f(0.2f, 0.4f, 0.8f);
+            } else if (colorIndex < 0.25) {
+              glColor3f(0.267f, 0.533f, 0.729f);
+            } else if (colorIndex < 0.3) {
+              glColor3f(0.337f, 0.667f, 0.667f);
+            } else if (colorIndex < 0.35) {
+              glColor3f(0.4f, 0.796f, 0.6f);
+            } else if (colorIndex < 0.4) {
+              glColor3f(0.4f, 0.796f, 0.6f);
+            } else if (colorIndex < 0.45) {
+              glColor3f(0.471f, 0.933f, 0.529f);
+            } else if (colorIndex < 0.5) {
+              glColor3f(0.604f, 0.796f, 0.396f);
+            } else if (colorIndex < 0.55) {
+              glColor3f(0.667f, 0.667f, 0.333f);
+            } else if (colorIndex < 0.6) {
+              glColor3f(0.83f, 1.0f, 0.16f);
+            } else if (colorIndex < 0.65) {
+              glColor3f(0.733f, 0.533f, 0.263f);
+            } else if (colorIndex < 0.7) {
+              glColor3f(0.8f, 0.396f, 0.2f);
+            } else {
+              glColor3f(0.945f, 0.110f, 0.055f);
+            }
+          }
+          
+          glVertex2i(x, y);
+        }
+      }
+      glEnd();
+    }
+  };
+  
 
-void Display6() {
-  //Draw the Mandelbrot fractal here.
-  float drawSize = 1.0;
-  MB<double> mb(-2, 2, -2, 2);
-  /*
-    +1 because we're going full-window, and pixel-perfect drawing
-    is weird because pixels are actually placed at 0.5 coordinates.
-    More on this in the Shaders homework and lecture.
-  */
-  mb.draw(-drawSize, drawSize, -drawSize, drawSize, g_w + 1, g_h + 1);
+
+MB<double>* mandelbrot;
+void Display6()
+{
+    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    const int width = glutGet( GLUT_WINDOW_WIDTH );
+    const int height = glutGet( GLUT_WINDOW_HEIGHT );
+    glOrtho( 0, width, 0, height, -1, 1 );
+
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+
+    mandelbrot->compute_mandelbrot( -2.0, 2.0, -2.0, 2.0 );
+    glutSwapBuffers();
 }
+
+
 
 void Display7() {
 }
