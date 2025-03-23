@@ -14,11 +14,14 @@ double halfCircle = atan(1) * 4;
 double tau = circle; // 2 * PI = TAU
 double pi = halfCircle; // TAU / 2 = PI
 
+const int num = 100;       // numar puncte pe curba
+const double a = 0.2;
+const double epsilon = 0.001;
 //How often should the drawing algorithm sample the function.
 double step = 0.05;
 
 
-int defaultW = 1000, defaultH = 1000;
+int defaultW = 800, defaultH = 800;
 
 unsigned char prevKey;
 
@@ -138,26 +141,95 @@ void Display2() {
      \right.
    \)
  */
-void Display3() {
+void Display3()
+{
+    double xMax = 20.0;
+    double yMax = 1.0;
+
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINE_STRIP);
+
+    for (double x = 0; x <= xMax; x += step)
+    {
+        double y;
+        if (x == 0)
+            y = 1.0;
+        else
+        {
+            double floorx = floor(x);
+            double ceilx = ceil(x);
+            double d;
+            if (x - floorx < ceilx - x) d = x - floorx;
+            else d = ceilx - x;
+
+            y = d / x;
+        }
+
+        double nx = x / xMax * 0.9;
+        double ny = y / yMax * 0.9;
+
+        glVertex2d(nx, ny);
+    }
+
+    glEnd();
 }
 
+
+
 //3) function arguments e.g.: f(a, b, t), where a and b are function family parameters, and the is the driving variables.
-void plot(double (*x)(double, double, double), double (*y)(double, double, double), double a, double b, double intervalStart, double intervalEnd, double step = 0.01, double scaleX = 1, double scaleY = 1, GLint primitive = GL_LINE_STRIP);
+void plot(
+    double (*fx)(double, double, double),
+    double (*fy)(double, double, double),
+    double a, double b,
+    double intervalStart, double intervalEnd,
+    double step = 0.05,
+    double scaleX = 1.0,
+    double scaleY = 1.0,
+    GLint primitive = GL_LINE_STRIP
+) {
+    glBegin(primitive);
+
+    for (double t = intervalStart; t <= intervalEnd; t += step) {
+        double x = fx(a, b, t) / scaleX;
+        double y = fy(a, b, t) / scaleY;
+
+        glVertex2d(x, y);
+    }
+
+    glEnd();
+}
 
 /*
   2) Circle Concoid (Limaçon, Pascal's Snail):
   \(x = 2 \cdot (a \cdot cos(t) + b) \cdot cos(t), \; y = 2 \cdot (a \cdot cos(t) + b) \cdot sin(t), \; t \in (-\pi, \pi)\) .
   For this plot, \(a = 0.3, \; b = 0.2\) .
 */
-void Display4() {
+double limaconX(double a, double b, double t) {
+    return 2 * (a * cos(t) + b) * cos(t);
 }
 
-/*
-  2) Cicloid:
-  \(x = a \cdot t - b \cdot sin(t), \; y = a - b \cdot cos(t), \; t \in \mathbb{R} \) .
-  For this plot, \(a = 0.1, \; b = 0.2\) .
-*/
+double limaconY(double a, double b, double t) {
+    return 2 * (a * cos(t) + b) * sin(t);
+}
+
+void Display4() {
+    glColor3f(0, 0, 0);
+    plot(limaconX, limaconY, 0.3, 0.2, -pi, pi, 0.01, 1.0, 1.0);
+}
+    
+
+double cicloidX(double a, double b, double t) {
+    return a * t - b * sin(t);
+}
+
+double cicloidY(double a, double b, double t) {
+    return a - b * cos(t);
+}
+
 void Display5() {
+    glColor3f(0, 0, 0); // negru
+
+    plot( cicloidX, cicloidY,0.1, 0.2, -3*pi, 8 * pi, step, 5.0, 2.0);
 }
 
 /*
@@ -167,8 +239,19 @@ void Display5() {
   \( t \in \left[ 0, 2\pi \right] \) .
   For this plot, \(a = 0.1, \; b = 0.3\) .
 */
-void Display6() {
+double epicicloidX(double a, double b, double t) {
+    return (a + b) * cos((b / a) * t) - b * cos(t + (b / a) * t);
 }
+
+double epicicloidY(double a, double b, double t) {
+    return (a + b) * sin((b / a) * t) - b * sin(t + (b / a) * t);
+}
+
+void Display6() {
+    glColor3f(0, 0, 0);
+    plot(epicicloidX, epicicloidY, 0.1, 0.3, 0, 2 * pi, 0.01, 0.8, 0.8);
+}
+
 
 /*
   2) Hipocicloid:
@@ -177,15 +260,49 @@ void Display6() {
   \( t \in \left[ 0, 2\pi \right] \) .
   For this plot, \(a = 0.1, \; b = 0.3\) .
  */
-void Display7() {
+double hipocicloidX(double a, double b, double t) {
+    return (a - b) * cos((b / a) * t) - b * cos(t - (b / a) * t);
 }
+
+double hipocicloidY(double a, double b, double t) {
+    return (a - b) * sin((b / a) * t) - b * sin(t - (b / a) * t);
+}
+
+void Display7() {
+    glColor3f(0, 0, 0);
+    plot(hipocicloidX, hipocicloidY, 0.1, 0.3, 0, 2 * pi, 0.01, 0.8, 0.8);
+}
+
+
 
 /*
  4) Logarithmic spiral (in polar coordinates):
  \( r = a \cdot e^{1+t}, \; t \in (0, \infty) \) .
  For this plot, \(a = 0.02\) .
 */
-void Display8() {
+double polarLogSpiralX (double a, double dummy, double t)
+{
+    double r = a * exp(1 + t);
+
+    return r * cos(t); // get the Cartesian coordinate
+}
+
+
+
+double polarLogSpiralY (double a, double dummy, double t)
+{
+    double r = a * exp(1 + t);
+
+    return r * sin(t); // get the Cartesian coordinate
+}
+
+
+
+void Display8 ()
+{
+    glColor3f(0, 0, 0);
+
+    plot(polarLogSpiralX, polarLogSpiralY, 0.02, 0, 0, 4, 0.05, 3.0, 3.0);
 }
 
 /*
@@ -193,7 +310,29 @@ void Display8() {
   \( r = sin(a \cdot t), \; t \in (0, \infty)  \) .
   For this plot, \(a = 10\), and the number 'petals' is \( 2 \cdot a \). Think about why.
 */
-void Display9() {
+double polarFlowerX (double a, double dummy, double t)
+{
+    double r = sin(a * t);
+
+    return r * cos(t); // get the Cartesian coordinate
+}
+
+
+
+double polarFlowerY (double a, double dummy, double t)
+{
+    double r = sin(a * t);
+
+    return r * sin(t); // get the Cartesian coordinate
+}
+
+
+
+void Display9 ()
+{
+    glColor3f(0, 0, 0);
+
+    plot(polarFlowerX, polarFlowerY, 10, 0, 0, 2 * pi, 0.01, 1.3, 1.3);
 }
 
 /*
@@ -204,9 +343,53 @@ y = \frac{a \cdot tg(t)}{4 \cdot cos^2(t) - 3}, \;
 t \in (-\pi/2, \pi/2) \setminus \{ -\pi/6, \pi/6 \} \) .
 For this plot, \(a = 0.2\) .
  */
-void Display10() {
+std::vector<double> x(num), y(num);
+
+void trisectrix(double t, double& x, double& y)
+{
+    double denom = 4 * pow(cos(t), 2) - 3;
+    x = a / denom;
+    y = a * tan(t) / denom;
 }
 
+void Display10()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    double t_min = -pi / 6 + epsilon;
+    double t_max =  pi / 6 - epsilon;
+    double dt = (t_max - t_min) / (num - 1);
+
+    // genereaza punctele pe curba
+    for (int i = 0; i < num; ++i)
+    {
+        double t = t_min + i * dt;
+        trisectrix(t, x[i], y[i]);
+    }
+
+    // gaseste punctul cel mai din stanga (x minim)
+    double x_fixed = x[0];
+    for (int i = 1; i < num; ++i)
+        if (x[i] < x_fixed)
+            x_fixed = x[i];
+
+    // deseneaza triunghiurile
+    for (int i = 0; i < num - 1; ++i)
+    {
+        if (i % 2 == 0)
+            glColor3f(1.0, 0.0, 0.0);  // rosu
+        else
+            glColor3f(0.0, 0.0, 0.0);  // negru
+
+        glBegin(GL_TRIANGLES);
+            glVertex2d(x_fixed, y[i]);     // punctul fix
+            glVertex2d(x[i], y[i]);        // punct pe curba
+            glVertex2d(x[i+1], y[i+1]);    // urmatorul punct pe curba
+        glEnd();
+    }
+
+    glFlush();
+}
 void init(void) {
   glClearColor(1.0,1.0,1.0,1.0);
   glLineWidth(2);
