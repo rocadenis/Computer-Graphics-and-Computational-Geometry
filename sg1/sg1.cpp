@@ -9,15 +9,15 @@
 //#include "glut.h" //MSVC local library install
 #include <GL/glut.h> //system-wide install (or compiler default path)
 
-double circle = atan(1) * 8; 
+double circle = atan(1) * 8;
 double halfCircle = atan(1) * 4;
-double tau = circle; // 2 * PI = TAU
-double pi = halfCircle; // TAU / 2 = PI
+double tau = circle;
+double pi = halfCircle;
 
-const int num = 100;       // numar puncte pe curba
+const int num = 100;
 const double a = 0.2;
 const double epsilon = 0.001;
-//How often should the drawing algorithm sample the function.
+double anotherStep = 0.05;
 double step = 0.05;
 
 
@@ -229,7 +229,7 @@ double cicloidY(double a, double b, double t) {
 void Display5() {
     glColor3f(0, 0, 0); // negru
 
-    plot( cicloidX, cicloidY,0.1, 0.2, -3*pi, 8 * pi, step, 5.0, 2.0);
+    plot( cicloidX, cicloidY,0.1, 0.2, -3*pi, 3 * pi, step, 1.0, 1.0);
 }
 
 /*
@@ -345,68 +345,68 @@ For this plot, \(a = 0.2\) .
  */
 std::vector<double> x(num), y(num);
 
-void trisectrix(double t, double& x, double& y)
-{
-    double denom = 4 * pow(cos(t), 2) - 3;
-    x = a / denom;
-    y = a * tan(t) / denom;
-}
+
 
 void Display10()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    // variabile lipsă declarate
+    std::vector<std::pair<float, float>> curvePoints;
+    float minX = 0, maxY = 0;
+    float t, x, y;
 
-    double t_min = -pi / 6 + epsilon;
-    double t_max =  pi / 6 - epsilon;
-    double dt = (t_max - t_min) / (num - 1);
+    for (t = -pi / 2 + anotherStep; t < -pi / 6; t += anotherStep) {
+        x = a / (4 * pow(cos(t), 2) - 3);
+        y = (a * tan(t)) / (4 * pow(cos(t), 2) - 3);
 
-    // genereaza punctele pe curba
-    for (int i = 0; i < num; ++i)
-    {
-        double t = t_min + i * dt;
-        trisectrix(t, x[i], y[i]);
+        if (x < 0 && y > 0 && x >= -1 && y <= 1) {
+            curvePoints.push_back(std::make_pair(x, y));
+
+            if (x < minX) minX = x;
+            if (y > maxY) maxY = y;
+        }
     }
 
-    // gaseste punctul cel mai din stanga (x minim)
-    double x_fixed = x[0];
-    for (int i = 1; i < num; ++i)
-        if (x[i] < x_fixed)
-            x_fixed = x[i];
+    bool fillTriangles = true;
+    for (int i = 0; i < curvePoints.size() - 1; i++) {
+        glColor3f(1.0 * i / curvePoints.size(), 0, 0);
 
-    // deseneaza triunghiurile
-    for (int i = 0; i < num - 1; ++i)
-    {
-        if (i % 2 == 0)
-            glColor3f(1.0, 0.0, 0.0);  // rosu
-        else
-            glColor3f(0.0, 0.0, 0.0);  // negru
+        if (fillTriangles) {
+            glBegin(GL_TRIANGLES);
+                glVertex2f(minX, maxY);
+                glVertex2f(curvePoints[i].first, curvePoints[i].second);
+                glVertex2f(curvePoints[i + 1].first, curvePoints[i + 1].second);
+            glEnd();
+        }
+        else {
+            glBegin(GL_LINES);
+                glVertex2f(minX, maxY);
+                glVertex2f(curvePoints[i].first, curvePoints[i].second);
+                glVertex2f(curvePoints[i + 1].first, curvePoints[i + 1].second);
+            glEnd();
+        }
 
-        glBegin(GL_TRIANGLES);
-            glVertex2d(x_fixed, y[i]);     // punctul fix
-            glVertex2d(x[i], y[i]);        // punct pe curba
-            glVertex2d(x[i+1], y[i+1]);    // urmatorul punct pe curba
-        glEnd();
+        fillTriangles = !fillTriangles;
     }
 
     glFlush();
 }
 void init(void) {
-  glClearColor(1.0,1.0,1.0,1.0);
-  glLineWidth(2);
-  glPointSize(1);
-  //glPolygonMode(GL_FRONT, GL_LINE);
-  //Enabling blending and smoothing
-  glEnable(GL_SMOOTH);
-  glEnable(GL_POINT_SMOOTH);
-  glEnable(GL_LINE_SMOOTH);
-  glEnable(GL_POLYGON_SMOOTH);
-  glHint(GL_NICEST, GL_POINT_SMOOTH_HINT);
-  glHint(GL_NICEST, GL_LINE_SMOOTH_HINT);
-  glHint(GL_NICEST, GL_POLYGON_SMOOTH_HINT);
-  glEnable (GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-}
+    glClearColor(1.0,1.0,1.0,1.0);
+    glLineWidth(2);
+    glPointSize(1);
+    //glPolygonMode(GL_FRONT, GL_LINE);
+    //Enabling blending and smoothing
+    glEnable(GL_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH);
+    glHint(GL_NICEST, GL_POINT_SMOOTH_HINT);
+    glHint(GL_NICEST, GL_LINE_SMOOTH_HINT);
+    glHint(GL_NICEST, GL_POLYGON_SMOOTH_HINT);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+  }
 
 void Display(void) {
   std::cout<<("Call Display")<<std::endl;
