@@ -11,7 +11,7 @@
 using namespace std::complex_literals;
 
 //#include "glut.h" //MSVC local library install
-#include <GL/glut.h> //system-wide install (or compiler default path)
+#include "GL/glut.h" //system-wide install (or compiler default path)
 
 double circle = atan(1) * 8; 
 double halfCircle = atan(1) * 4;
@@ -460,12 +460,13 @@ public:
                 while (abs(z) < 2.0 && iterations < MAX_ITERATIONS) {
                     z = z * z + c;
                     ++iterations;
+                    //std::cout << "z = " << z << ", abs(z) = " << abs(z) << ", iterations = " << iterations << std::endl;
                 }
 
                 if (iterations == MAX_ITERATIONS) {
-                    glColor3f(0.0f, 0.0f, 0.0f); // Negru pentru punctele din mulțimea Mandelbrot
+                    glColor3f(0.0f, 0.0f, 0.0f); // negru pentru punctele din multimea Mandelbrot
                 } else {
-                    float colorIndex = (iterations % 17) / 16.0f;//transform numarul de iteratii ntr-un indice intre 0 si 1
+                    float colorIndex = (iterations % 17) / 15.0f;//transform numarul de iteratii ntr-un indice intre 0 si 1
 
                     if (colorIndex < 0.1) {
                         glColor3f(0.0706f, 0.1294f, 0.9333f);
