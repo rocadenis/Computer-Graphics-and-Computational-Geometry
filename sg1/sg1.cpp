@@ -227,7 +227,7 @@ double cicloidY(double a, double b, double t) {
 }
 
 void Display5() {
-    glColor3f(0, 0, 0); // negru
+    glColor3f(0, 0, 0); 
 
     plot( cicloidX, cicloidY,0.1, 0.2, -3*pi, 3 * pi, step, 1.0, 1.0);
 }
@@ -284,7 +284,7 @@ double polarLogSpiralX (double a, double dummy, double t)
 {
     double r = a * exp(1 + t);
 
-    return r * cos(t); // get the Cartesian coordinate
+    return r * cos(t); 
 }
 
 
@@ -293,7 +293,7 @@ double polarLogSpiralY (double a, double dummy, double t)
 {
     double r = a * exp(1 + t);
 
-    return r * sin(t); // get the Cartesian coordinate
+    return r * sin(t); 
 }
 
 
@@ -314,7 +314,7 @@ double polarFlowerX (double a, double dummy, double t)
 {
     double r = sin(a * t);
 
-    return r * cos(t); // get the Cartesian coordinate
+    return r * cos(t); 
 }
 
 
@@ -323,7 +323,7 @@ double polarFlowerY (double a, double dummy, double t)
 {
     double r = sin(a * t);
 
-    return r * sin(t); // get the Cartesian coordinate
+    return r * sin(t); 
 }
 
 
@@ -343,13 +343,9 @@ y = \frac{a \cdot tg(t)}{4 \cdot cos^2(t) - 3}, \;
 t \in (-\pi/2, \pi/2) \setminus \{ -\pi/6, \pi/6 \} \) .
 For this plot, \(a = 0.2\) .
  */
-std::vector<double> x(num), y(num);
-
-
 
 void Display10()
 {
-    // variabile lipsă declarate
     std::vector<std::pair<float, float>> curvePoints;
     float minX = 0, maxY = 0;
     float t, x, y;
